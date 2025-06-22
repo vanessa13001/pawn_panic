@@ -17,7 +17,7 @@ Edit
 
 ## Screenshot
 
-![Chess Board](images/Chesss.png)
+![Chess Board](Chesss.png)
 
 ## Usage
 
