@@ -15,7 +15,7 @@ vbnet
 Copy
 Edit
 
-## Screenshot
+## Chess-Game
 
 ![Chess Board](Chesss.png)
 
