@@ -4,28 +4,25 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.HashMap;
+import java.awt.image.BufferedImage;
 
 public class ChessGUI extends JFrame {
-    private static final int ICON_SIZE = 64; // <- Taille uniforme des icônes ici
-
+    private static final int ICON_SIZE = 64;
     private JButton[][] squares = new JButton[8][8];
     private ChessBoard board;
     private int selectedX = -1, selectedY = -1;
-
-    // Map des icônes pour chaque type de pièce + couleur
     private HashMap<String, ImageIcon> icons = new HashMap<>();
+    private ImageIcon backgroundImage;
 
     public ChessGUI() {
         board = new ChessBoard();
-
         setTitle("Jeu d'échecs - Pawn Panic");
         setSize(600, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
-        
 
         JPanel chessPanel = new JPanel(new GridLayout(8, 8));
-        initializeIcons(); // Chargement des images
+        initializeIcons();
         initializeBoard(chessPanel);
 
         add(chessPanel, BorderLayout.CENTER);
@@ -35,7 +32,6 @@ public class ChessGUI extends JFrame {
         add(infoLabel, BorderLayout.SOUTH);
 
         refreshBoard();
-
         setVisible(true);
     }
 
@@ -52,6 +48,15 @@ public class ChessGUI extends JFrame {
         loadIcon("knight_black");
         loadIcon("pawn_white");
         loadIcon("pawn_black");
+
+        String bgPath = "/images/blue3.jpg";
+        java.net.URL bgImgURL = getClass().getResource(bgPath);
+        if (bgImgURL != null) {
+            Image img = new ImageIcon(bgImgURL).getImage().getScaledInstance(8 * ICON_SIZE, 8 * ICON_SIZE, Image.SCALE_SMOOTH);
+            backgroundImage = new ImageIcon(img);
+        } else {
+            System.err.println("Image de fond non trouvée : " + bgPath);
+        }
     }
 
     private void loadIcon(String name) {
@@ -71,7 +76,11 @@ public class ChessGUI extends JFrame {
             for (int x = 0; x < 8; x++) {
                 JButton btn = new JButton();
                 btn.setMargin(new Insets(0, 0, 0, 0));
-                btn.setBackground(getSquareColor(x, y));
+                // Ne pas définir d'icône ici pour éviter doublons
+                btn.setOpaque(false);
+                btn.setContentAreaFilled(false);
+                btn.setBorderPainted(false);
+                btn.setFocusPainted(false);
                 final int fx = x;
                 final int fy = y;
                 btn.addActionListener(e -> onSquareClicked(fx, fy));
@@ -81,8 +90,39 @@ public class ChessGUI extends JFrame {
         }
     }
 
-    private Color getSquareColor(int x, int y) {
-    return ((x + y) % 2 == 0) ? new Color(255, 255, 255) : new Color(180, 160, 210);
+    private ImageIcon createSubImage(ImageIcon originalIcon, int x, int y) {
+    Image originalImage = originalIcon.getImage();
+    int subImageWidth = originalImage.getWidth(null) / 8;
+    int subImageHeight = originalImage.getHeight(null) / 8;
+
+    BufferedImage subImage = new BufferedImage(subImageWidth, subImageHeight, BufferedImage.TYPE_INT_ARGB);
+    Graphics2D g2d = subImage.createGraphics();
+    g2d.drawImage(originalImage,
+        0, 0, subImageWidth, subImageHeight,
+        x * subImageWidth, y * subImageHeight, (x + 1) * subImageWidth, (y + 1) * subImageHeight,
+        null);
+    g2d.dispose();
+    return new ImageIcon(subImage);
+}
+
+
+    private Icon createCompositeIcon(ImageIcon backgroundIcon, ImageIcon pieceIcon, int x, int y) {
+    BufferedImage compositeImage = new BufferedImage(ICON_SIZE, ICON_SIZE, BufferedImage.TYPE_INT_ARGB);
+    Graphics2D g2d = compositeImage.createGraphics();
+
+    // Dessiner l'image de fond
+    ImageIcon subImageIcon = createSubImage(backgroundIcon, x, y);
+    Image bgImg = subImageIcon.getImage();
+    g2d.drawImage(bgImg, 0, 0, ICON_SIZE, ICON_SIZE, null);
+
+    // Dessiner la pièce au-dessus, si elle existe
+    if (pieceIcon != null) {
+        Image pieceImg = pieceIcon.getImage();
+        g2d.drawImage(pieceImg, 0, 0, ICON_SIZE, ICON_SIZE, null);
+    }
+
+    g2d.dispose();
+    return new ImageIcon(compositeImage);
 }
 
 
@@ -108,13 +148,13 @@ public class ChessGUI extends JFrame {
 
     private void highlightSelectedSquare() {
         clearHighlights();
-        squares[selectedX][selectedY].setBackground(Color.YELLOW);
+        squares[selectedX][selectedY].setBorder(BorderFactory.createLineBorder(Color.YELLOW, 3));
     }
 
     private void clearHighlights() {
         for (int y = 7; y >= 0; y--) {
             for (int x = 0; x < 8; x++) {
-                squares[x][y].setBackground(getSquareColor(x, y));
+                squares[x][y].setBorder(BorderFactory.createEmptyBorder());
             }
         }
     }
@@ -125,11 +165,12 @@ public class ChessGUI extends JFrame {
                 Piece piece = board.getPiece(x, y);
                 JButton btn = squares[x][y];
                 if (piece == null) {
-                    btn.setIcon(null);
+                    btn.setIcon(createSubImage(backgroundImage, x, y));
                     btn.setText("");
                 } else {
                     String key = piece.getType().toLowerCase() + "_" + (piece.isWhite() ? "white" : "black");
-                    btn.setIcon(icons.get(key));
+                    ImageIcon pieceIcon = icons.get(key);
+                    btn.setIcon(createCompositeIcon(backgroundImage, pieceIcon, x, y));
                     btn.setText("");
                 }
             }

@@ -1,0 +1,11 @@
+src/main/java/com/riad/chess/App.java
+src/main/java/com/riad/chess/Bishop.java
+src/main/java/com/riad/chess/ChessBoard.java
+src/main/java/com/riad/chess/ChessGUI.java
+src/main/java/com/riad/chess/King.java
+src/main/java/com/riad/chess/Knight.java
+src/main/java/com/riad/chess/Main.java
+src/main/java/com/riad/chess/Pawn.java
+src/main/java/com/riad/chess/Piece.java
+src/main/java/com/riad/chess/Queen.java
+src/main/java/com/riad/chess/Rook.java
