@@ -1,0 +1,30 @@
+# Fichiers compilés Java
+*.class
+
+# Dossier de sortie compilé
+/out/
+
+# Fichiers IDE (Eclipse, IntelliJ, VSCode, NetBeans)
+*.classpath
+*.project
+*.settings/
+.idea/
+*.iml
+.vscode/
+
+# Logs et fichiers temporaires
+*.log
+*.tmp
+*.temp
+
+# Système d’exploitation (macOS, Windows)
+.DS_Store
+Thumbs.db
+
+# Fichiers de build
+/build/
+/target/
+
+# fichiers générés par Maven ou Gradle (si utilisés)
+.mvn/
+.gradle/
